@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML Previewer</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Full-screen body with gradient background */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Default Paste Button (blue style) */
+    #pasteButton {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 123, 255, 0.7); /* Transparent blue */
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    #pasteButton:hover {
+      background: rgba(0, 123, 255, 0.9); /* Less transparent on hover */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+
+    /* Water-like Transparent Paste Button style override */
+    .water {
+      background: rgba(255, 255, 255, 0.2) !important; /* Water-like transparent */
+      border: 1px solid rgba(255, 255, 255, 0.3) !important; /* Light border */
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+      backdrop-filter: blur(5px) !important; /* Adds a blur effect to the background */
+    }
+
+    .water:hover {
+      background: rgba(255, 255, 255, 0.3) !important; /* Slightly less transparent on hover */
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* Preview Container */
+    #previewContainer {
+      width: 100%;
+      height: 100vh;
+      border: none;
+      background: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Error Message */
+    #errorMessage {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff4d4d;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Paste Button -->
+  <button id="pasteButton">Paste</button>
+
+  <!-- Preview Container -->
+  <iframe id="previewContainer"></iframe>
+
+  <!-- Error Message -->
+  <div id="errorMessage">Invalid HTML code! Please copy valid HTML.</div>
+
+  <script>
+    // Handle Paste Button click
+    document.getElementById('pasteButton').addEventListener('click', async () => {
+      // Add water-like style on click
+      document.getElementById('pasteButton').classList.add('water');
+
+      try {
+        // Read clipboard text
+        const text = await navigator.clipboard.readText();
+
+        // Check if the text is not empty
+        if (text.trim()) {
+          // Update the iframe with the pasted HTML
+          const preview = document.getElementById('previewContainer').contentWindow.document;
+          preview.open();
+          preview.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <style>
+                  /* Add basic CSS reset */
+                  body { margin: 0; padding: 0; }
+                </style>
+              </head>
+              <body>
+                ${text}
+              </body>
+            </html>
+          `);
+          preview.close();
+
+          // Hide error message if shown
+          document.getElementById('errorMessage').style.display = 'none';
+        } else {
+          // Show error message for empty clipboard
+          document.getElementById('errorMessage').innerText = 'Clipboard is empty! Please copy valid HTML/CSS/JS.';
+          document.getElementById('errorMessage').style.display = 'block';
+          setTimeout(() => {
+            document.getElementById('errorMessage').style.display = 'none';
+          }, 3000);
+        }
+      } catch (error) {
+        // Show error message if clipboard access fails
+        document.getElementById('errorMessage').innerText = 'Failed to read clipboard. Please ensure you have copied valid HTML/CSS/JS.';
+        document.getElementById('errorMessage').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('errorMessage').style.display = 'none';
+        }, 3000);
+        console.error('Clipboard read error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
